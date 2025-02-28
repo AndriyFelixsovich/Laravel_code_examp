@@ -1,0 +1,25 @@
+file_put_contents(storage_path('file.txt'), json_encode($this->query(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+			$subcategoryre = file_get_contents(storage_path('file.txt'));
+			$subcategory = json_decode($subcategoryre, true);
+
+			$category = Category::pluck('name', 'id')->toArray();
+
+			foreach ($subcategory as $item) {
+
+				foreach ($category as $category_id => $category_name) {
+					// Перевіряємо, чи cat_name є в рядку $category_name
+
+					if (stripos($category_name, $item['cat_name']) !== false) {
+						$startYear = empty($item['start_year']) ? null : (int) $item['start_year'];
+						$endYear = empty($item['end_year']) ? null : (int) $item['end_year'];
+						// Вставляємо в таблицю Example
+						$modelauto = new Example();
+						$modelauto->category_id = $category_id;
+						$modelauto->name = $item['name'];
+						$modelauto->start_year = $startYear;
+						$modelauto->end_year = $endYear;
+						$modelauto->save();
+					}
+				}
+			}
