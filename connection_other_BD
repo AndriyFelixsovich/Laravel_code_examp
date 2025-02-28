@@ -1,0 +1,35 @@
+public function query(){
+		$defaultConnection = DB::connection();
+		// Динамічно створюємо підключення до іншої бази
+		$customConnection = DB::connection()->setPdo(new PDO(
+			'mysql:host=;dbname=;charset=utf8',
+			'root',
+			'',
+			[PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+		));
+		$results = DB::select('SELECT name, category_id FROM oc_allegro_category WHERE parent_id = ?', [6]);
+		foreach ($results as $row){
+			$namesModel[] = [
+				'name' => $row->name,
+				'category_id' => $row->category_id
+			];
+		}
+
+		 // Масив для збереження даних
+
+		foreach ($namesModel as $names) {
+			$results = DB::select('SELECT name, category_id FROM oc_allegro_category WHERE parent_id = ?', [$names["category_id"]]);
+
+			foreach ($results as $result) {
+				$finalResults[] = [
+					'cat_name' => $names['name'],
+					'name' => $result->name
+				];
+			}
+		}
+
+
+		DB::connection()->setPdo($defaultConnection->getPdo());
+		return $finalResults;
+
+	}
